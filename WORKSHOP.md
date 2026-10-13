@@ -121,23 +121,55 @@ Six internal policy documents:
 
 ### The bare minimum
 
-An agent is just a loop. At its simplest:
+One request, one response. No loop, no tools — Claude answers from training knowledge only.
 
 ```
-START
-  messages = []
+REQUEST 1:
+  messages = [
+    {"role": "user", "content": "Which vendors have overdue invoices?"}
+  ]
 
-  LOOP:
-    user_input = "Which vendors have overdue invoices?"
-    messages = [user_input]
-
-    response = claude.chat(messages)
-    # stop_reason = "end_turn"
-    # content     = "I don't have access to your vendor data..."
-
-    print "I don't have access to your vendor data..."
-END
+RESPONSE 1:
+  stop_reason = "end_turn"    ← always end_turn, no loop
+  content     = "In procurement, overdue invoices typically occur
+                 when payment terms are exceeded..."
+                 ← generic answer, knows nothing about YOUR data
 ```
+
+**What about remembering earlier messages?**
+
+The messages list IS the memory. Without it, Claude forgets every turn:
+
+```
+WITHOUT history (forgets):
+
+  REQUEST 1:
+    messages = [{"role": "user", "content": "My name is Alex"}]
+  RESPONSE 1: "Hi Alex!"
+
+  REQUEST 2:
+    messages = [{"role": "user", "content": "What is my name?"}]
+                ← Alex not here
+  RESPONSE 2: "I don't know your name."
+
+
+WITH history (remembers):
+
+  REQUEST 1:
+    messages = [{"role": "user", "content": "My name is Alex"}]
+  RESPONSE 1: "Hi Alex!"
+
+  REQUEST 2:
+    messages = [
+      {"role": "user",      "content": "My name is Alex"},  ← kept
+      {"role": "assistant", "content": "Hi Alex!"},          ← kept
+      {"role": "user",      "content": "What is my name?"}  ← new
+    ]
+  RESPONSE 2: "Your name is Alex."
+```
+
+> The messages list is the memory — you control what stays in it.
+> We cover memory management in depth in Session 2.
 
 No memory. No tools. Just Claude answering from its training knowledge.
 This works for general questions. It completely fails for questions about YOUR data.
