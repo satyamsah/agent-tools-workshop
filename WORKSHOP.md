@@ -124,13 +124,22 @@ Six internal policy documents:
 An agent is just a loop. At its simplest:
 
 ```
-1. Send message to Claude
-2. Claude replies
-3. Show reply to user
+START
+  messages = []
+
+  LOOP:
+    user_input = "Which vendors have overdue invoices?"
+    messages = [user_input]
+
+    response = claude.chat(messages)
+    # stop_reason = "end_turn"
+    # content     = "I don't have access to your vendor data..."
+
+    print "I don't have access to your vendor data..."
+END
 ```
 
 No memory. No tools. Just Claude answering from its training knowledge.
-
 This works for general questions. It completely fails for questions about YOUR data.
 
 ### Adding tools
@@ -140,12 +149,37 @@ A tool is a function you write. You describe it to Claude in JSON. Claude decide
 The loop becomes:
 
 ```
-1. Send message + tool definitions to Claude
-2. If Claude calls a tool:
-     a. Run the function yourself
-     b. Send the result back to Claude
-     c. Go to step 2
-3. If Claude replies with text → show it to the user
+START
+  messages = []
+  tools = [query_database, search_knowledge_base, generate_report]
+
+  user_input = "Which vendors have overdue invoices?"
+  messages = [user_input]
+
+  ── ITERATION 1 ──────────────────────────────────────────────
+  response = claude.chat(messages, tools)
+  # stop_reason = "tool_use"                ← Claude wants data
+  # tool_name   = "query_database"
+  # tool_inputs = {"sql": "SELECT v.name FROM vendors v
+  #                        JOIN invoices i ON ...
+  #                        WHERE i.status = 'Overdue'"}
+
+  result = run("query_database", sql)
+  # result = "Delta Logistics GmbH
+  #           Eastern Parts Corp"
+
+  messages.append(claude's tool call)       ← add Claude's request
+  messages.append(tool result)              ← add your result
+
+  ── ITERATION 2 ──────────────────────────────────────────────
+  response = claude.chat(messages, tools)
+  # stop_reason = "end_turn"                ← Claude has enough
+  # content     = "Two vendors have overdue invoices:
+  #                Delta Logistics GmbH and Eastern Parts Corp."
+
+  print answer
+STOP
+END
 ```
 
 That's it. That's the entire agent loop.
@@ -331,22 +365,43 @@ Claude calls them in sequence — the result of the first informs the second.
 ### The loop with two tool calls
 
 ```
-You                              Claude
- |                                   |
- |── question ──────────────────────→|
- |                                   | → call query_database
- |←── tool_use: query_database ──────|
- |  [run SQL]                        |
- |── tool result: overdue vendors ──→|
- |                                   | → call search_knowledge_base
- |←── tool_use: search_knowledge_base|
- |  [run search]                     |
- |── tool result: policy text ──────→|
- |                                   | → I have enough → answer
- |←── final answer ──────────────────|
+START
+  user_input = "Which vendors have overdue invoices
+                AND what does policy say about them?"
+
+  ── ITERATION 1 ──────────────────────────────────────────────
+  response = claude.chat(messages, tools)
+  # stop_reason = "tool_use"
+  # tool_name   = "query_database"
+  # tool_inputs = {"sql": "SELECT ... WHERE status = 'Overdue'"}
+
+  result = "Delta Logistics GmbH, Eastern Parts Corp"
+  messages.append(tool call + result)
+
+  ── ITERATION 2 ──────────────────────────────────────────────
+  response = claude.chat(messages, tools)
+  # stop_reason = "tool_use"                ← still not done
+  # tool_name   = "search_knowledge_base"   ← now needs policy
+  # tool_inputs = {"query": "overdue invoice payment policy"}
+
+  result = "Invoices overdue >90 days must be escalated
+            to Finance Director. Vendors with >3 overdue
+            invoices flagged for risk review..."
+  messages.append(tool call + result)
+
+  ── ITERATION 3 ──────────────────────────────────────────────
+  response = claude.chat(messages, tools)
+  # stop_reason = "end_turn"                ← now Claude is done
+  # content     = "Delta Logistics and Eastern Parts have overdue
+  #                invoices. Per policy, escalate to Finance
+  #                Director if overdue >90 days."
+
+  print answer
+STOP
+END
 ```
 
-Three round trips. Claude orchestrates the sequence dynamically — it decides after each result whether it needs more tools or can now answer.
+Three iterations. Claude orchestrates the sequence dynamically — it decides after each result whether it needs more tools or can now answer.
 
 ### Claude decides the order
 
