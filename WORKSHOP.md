@@ -78,7 +78,7 @@ python check_setup.py
 
 ## The domain — ERP Procurement
 
-We use a simplified enterprise procurement system. This is the domain that runs inside SAP, Oracle, and every large company's ERP system.
+We use a simplified enterprise procurement system. This is the domain that runs inside every large company's ERP system.
 
 **Five tables:**
 
