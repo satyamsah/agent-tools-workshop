@@ -174,6 +174,28 @@ WITH history (remembers):
 No memory. No tools. Just Claude answering from its training knowledge.
 This works for general questions. It completely fails for questions about YOUR data.
 
+### stop_reason — the only condition you check
+
+Every Claude response has a `stop_reason`. It tells you why Claude stopped:
+
+| stop_reason | Meaning | What you do |
+|---|---|---|
+| `end_turn` | Claude finished — it has an answer | Show the answer to the user, stop |
+| `tool_use` | Claude is not done — it needs to call a tool | Run the tool, send result back, loop again |
+
+```
+if stop_reason == "end_turn":
+    → show answer, stop
+
+if stop_reason == "tool_use":
+    → run the tool, send result back, loop again
+```
+
+In the bare agent — no tools — Claude always returns `end_turn` immediately.
+There are no tools to call so it just answers and stops. No loop needed.
+
+The agent loop only exists because of `tool_use`.
+
 ### Adding tools
 
 A tool is a function you write. You describe it to Claude in JSON. Claude decides when to call it.
