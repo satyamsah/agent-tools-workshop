@@ -37,7 +37,7 @@ By the end you will understand:
 
 ## Setup
 
-**Prerequisites:** Python 3.10–3.13, Anthropic API key
+**Prerequisites:** Python 3.10–3.13, Anthropic API key — get one at https://console.anthropic.com/settings/keys
 
 **Steps:**
 
@@ -72,9 +72,17 @@ By the end you will understand:
    This creates `data/erp.db` — 10 vendors, 50 purchase orders, 50 invoices, 45 goods receipts.
 
 6. Add your API key
+
+   Get a key:
+   1. Go to https://console.anthropic.com/settings/keys
+   2. Click **Create Key**
+   3. Copy the key (starts with `sk-ant-...`)
+
+   Add it to your `.env`:
    ```bash
    cp .env.example .env
-   # open .env and add your ANTHROPIC_API_KEY
+   # open .env and set:
+   # ANTHROPIC_API_KEY=sk-ant-...
    ```
 
 7. Verify everything works
