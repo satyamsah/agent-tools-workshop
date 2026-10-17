@@ -45,6 +45,9 @@ def query_database(sql: str) -> str:
         if not sql.strip().upper().startswith("SELECT"):
             return "Error: only SELECT queries are allowed."
 
+        # make string comparisons case-insensitive
+        conn.create_function("UPPER", 1, str.upper)
+
         c.execute(sql)
         rows = c.fetchall()
         conn.close()
@@ -81,7 +84,8 @@ Available tables:
   invoices        (invoice_id, po_id, amount, due_date, paid_date, status)
   goods_receipt   (gr_id, po_id, quantity_received, receipt_date)
 
-Always write clean, read-only SELECT statements.""",
+Always write clean, read-only SELECT statements.
+Status values use Title Case: 'Open', 'Closed', 'Cancelled', 'Paid', 'Overdue', 'Pending'.""",
     "input_schema": {
         "type": "object",
         "properties": {

@@ -1,7 +1,7 @@
 """
-Exercise 1 — Bare Agent (No Tools)
+Exercise 1 — Bare Claude (No Tools)
 =====================================
-The simplest possible agent — just Claude, no tools.
+The simplest possible setup — just Claude, no tools.
 It can only answer from its own training knowledge.
 
 Watch what happens when you ask it something that requires real data.
@@ -46,7 +46,7 @@ def ask(question: str) -> str:
 
 # ── Run three questions ───────────────────────────────────────────────────
 
-console.print(Rule("[bold]Exercise 1 — Bare Agent (No Tools)[/bold]"))
+console.print(Rule("[bold]Exercise 1 — Bare Claude (No Tools)[/bold]"))
 console.print("[dim]Claude answers from its own knowledge only — no database, no documents.[/dim]\n")
 
 questions = [
@@ -55,28 +55,37 @@ questions = [
     "What is our organisation's payment policy for late invoices?",
 ]
 
-for q in questions:
-    console.print(f"[bold cyan]Q:[/bold cyan] {q}")
+for i, q in enumerate(questions, 1):
+    console.print(f"[bold cyan]Q{i}:[/bold cyan] {q}")
     answer = ask(q)
-    console.print(Panel(answer, title="Agent", border_style="green"))
+    console.print(Panel(answer, title="Claude", border_style="green"))
     console.print()
 
-# ── What did you observe? ──────────────────────────────────────────────────
+console.print(Panel(
+    "Q1 (What is a PO?) → answered correctly — general business knowledge from training\n"
+    "Q2 (Which vendors have overdue invoices?) → fails or hallucinates — Claude has no database\n"
+    "Q3 (What is our payment policy?) → fails or makes something up — Claude has no policy docs\n\n"
+    "Claude is only as good as its training data.\n"
+    "It cannot answer YOUR questions about YOUR data.\n\n"
+    "Fix: give Claude tools to access real data. → Exercise 2.",
+    title="[bold]What you saw[/bold]", border_style="yellow"
+))
+
+console.print(Panel(
+    "Every response from Claude has two fields you care about:\n\n"
+    "  response.stop_reason      = 'end_turn'\n"
+    "  response.content[0].type  = 'text'\n"
+    "  response.content[0].text  = 'A purchase order is...'\n\n"
+    "No tools → stop_reason is always 'end_turn'.\n"
+    "In Exercise 2 you will see a second value: 'tool_use'.",
+    title="[bold]The response object[/bold]", border_style="cyan"
+))
+
+# ── Pop Quiz ──────────────────────────────────────────────────────────────
 #
-# Question 1: Claude answers well — "what is a PO" is general knowledge.
-# Question 2: Claude cannot answer — it has no access to our database.
-# Question 3: Claude makes something up or says it doesn't know — it has
-#             no access to our internal policy documents.
+# "Claude answered Q1 correctly without tools. Why?"
+# A) It searched the internet
+# B) It knows general business concepts from training
+# C) It guessed
 #
-# This is the stateless, tool-less agent problem.
-# The agent is only as good as its training data.
-#
-# Pop Quiz:
-#   "Claude answered Q1 correctly without tools. Why?"
-#   A) It searched the internet
-#   B) It knows general business concepts from training
-#   C) It guessed
-#
-#   Answer: B — Claude knows general concepts. It does NOT know YOUR data.
-#
-# In Exercise 2 you will give Claude tools to access real data.
+# Answer: B — Claude knows general concepts. It does NOT know YOUR data.

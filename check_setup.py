@@ -10,9 +10,9 @@ errors = []
 
 major, minor = sys.version_info[:2]
 if major < 3 or (major == 3 and minor < 10):
-    errors.append(f"Python 3.10–3.12 required (you have {major}.{minor})")
-elif major == 3 and minor > 12:
-    errors.append(f"Python {major}.{minor} not supported — install Python 3.12 via pyenv")
+    errors.append(f"Python 3.10+ required (you have {major}.{minor})")
+elif major == 3 and minor > 13:
+    errors.append(f"Python {major}.{minor} not tested — install Python 3.12 or 3.13 via pyenv")
 else:
     print(f"✓ Python {major}.{minor}")
 

@@ -30,14 +30,7 @@ load_dotenv()
 
 SYSTEM_PROMPT = """You are a procurement data analyst assistant for an enterprise organisation.
 You help analysts answer questions about purchase orders, vendors, invoices, and procurement policies.
-
-You have access to three tools:
-  - query_database: for any question involving numbers, data, counts, or amounts
-  - search_knowledge_base: for questions about policies, processes, or procedures
-  - generate_report: for full reports or analysis that need both data and context
-
-Always use a tool when the question requires data or policy information.
-Be concise — summarise tool results clearly, do not dump raw data at the user."""
+Be concise — summarise results clearly, do not dump raw data at the user."""
 
 
 def run_agent(question: str, tools: list, verbose: bool = True) -> str:
@@ -86,6 +79,7 @@ def run_agent(question: str, tools: list, verbose: bool = True) -> str:
                     if verbose:
                         preview = result[:120].replace("\n", " ")
                         print(f"  ← result: {preview}...")
+                        print()
 
                     tool_results.append({
                         "type": "tool_result",
